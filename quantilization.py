@@ -1,16 +1,21 @@
-import os
+"""
+INT8 КВАНТОВАНИЕ через TensorRT (требует NVIDIA GPU)
+"""
+
 from ultralytics import YOLO
 
-fp32_path = '/content/runs/detect/minidataset25/train_run25/weights/best.pt'
-int8_path = '/content/runs/detect/minidataset25/train_run25/weights/best.engine'
+MODEL_PATH = '/content/best.pt'
+DATASET_ROOT = '/content/drive/MyDrive/minidataset'
 
-fp32_size = os.path.getsize(fp32_path) / 1e6
-int8_size = os.path.getsize(int8_path) / 1e6
+model = YOLO(MODEL_PATH)
 
-print(f"FP32 модель: {fp32_size:.2f} MB")
-print(f"INT8 модель: {int8_size:.2f} MB")
-print(f"Сжатие: {(1 - int8_size/fp32_size)*100:.1f}%")
+model.export(
+    format='engine',      
+    half=False,          
+    int8=True,           
+    data=DATASET_ROOT + '/data.yaml',  
+    imgsz=640,
+    batch=1
+)
 
-if os.path.exists(int8_path):
-    model_int8 = YOLO(int8_path)
-    print("INT8 модель успешно загружена!")
+print("INT8 TensorRT модель создана: best.engine")
